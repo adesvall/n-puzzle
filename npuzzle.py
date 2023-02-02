@@ -7,10 +7,10 @@ for i in range(3):
     board.append([int(j) for j in input().split()])
 
 def print_res(t):
-    if not t[3]:
+    if not t.parent:
         return
-    i,j = empty_coord(t[1])
-    print_res(t[3])
+    i,j = t.emptycoord
+    print_res(t.parent)
     print(i, j)
 
 def empty_coord(t):
@@ -29,7 +29,7 @@ def swap(bd, i0, j0, dr):
     return t
 
 def hash(board):
-    return (tuple(l) for l in board)
+    return tuple(tuple(l) for l in board)
 
 def find_conflict(bd):
     cost=0
@@ -54,10 +54,11 @@ def estimate_cost(bd):
     return cost
 
 class State:
-    def __init__(self, f, board, parent) -> None:
+    def __init__(self, f, board, emptycoord, parent) -> None:
         self.f = f
         self.g = estimate_cost(board)
         self.board = board
+        self.emptycoord = emptycoord
         self.parent = parent
     
     def update(self, f, parent):
@@ -70,7 +71,7 @@ class State:
     def __repr__(self):
         return f"STATE f: {self.f}   g: {self.g}   board: {self.board}"
 
-initState = State(0, board, None)
+initState = State(0, board, empty_coord(board), None)
 opened = [initState]
 heapq.heapify(opened)
 openset = {
@@ -82,13 +83,16 @@ openset = {
 
 closed = []
 target = [[4*i, 4*i+1, 4*i+2, 4*i+3] for i in range(3)]
+targetset = set()
+targetset.add(hash(target))
 
 while opened:
     curr = heapq.heappop(opened)
-    print(curr)
+    # print(curr)
+    # print(openset)
     del openset[hash(curr.board)]
     f = curr.f
-    i0, j0 = empty_coord(curr.board)
+    i0, j0 = curr.emptycoord
     closed.append(curr)
     for dr in range(4):
         if not 0 <= i0 + (dr == 2) - (dr == 0) < 3:
@@ -97,13 +101,17 @@ while opened:
             continue
         newboard = swap(curr.board, i0, j0, dr)
 
-        if newboard == target:
-            print("trouvé")
-            exit()
         h = hash(newboard)
+        new_empty = i0 + (dr == 2) - (dr == 0), j0 + (dr == 1) - (dr == 3)
+        if h in targetset:
+            print("trouvé")
+            print_res(curr)
+            i, j = new_empty
+            print(i, j)
+            exit()
 
         if h not in openset:
-            openset[h] = State(f+1, newboard, curr)
+            openset[h] = State(f+1, newboard, new_empty, curr)
             heapq.heappush(opened, openset[h])
         elif f+1 < openset[h].f:
             openset[h].f = f+1
@@ -113,6 +121,6 @@ while opened:
 t = closed[-1]
 
 print_res(t)
-
+print('caca')
 # To debug: print("Debug messages...", file=sys.stderr, flush=True)
 
