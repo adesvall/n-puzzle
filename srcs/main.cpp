@@ -6,7 +6,6 @@
 #include "/usr/include/boost/heap/fibonacci_heap.hpp"
 #include <iostream>
 #include <sstream>
-#include <cmath>
 std::vector<int> parse(const char *arg);
 
 void print_res(State *curr)
@@ -32,11 +31,16 @@ int main(int argc, char const *argv[])
         std::cout << "\tn-puzzle file    <--  parse file and solve it" << std::endl;
         return 0;
     }
-    std::vector<int> board = parse(argv[1]);
-    int n = sqrt(board.size());
 
-    int inittab[12] = {4, 9, 0, 5,   10, 7, 1, 2,   11, 8, 3, 6};
-    Board init(inittab);
+    Board init = parse(argv[1]);
+    if (!init.is_solvable())
+    {
+        std::cout << "Not solvable." << std::endl;
+        return 0;
+    }
+    int n = init.size();
+    // int inittab[12] = {4, 9, 0, 5,   10, 7, 1, 2,   11, 8, 3, 6};
+    // Board init(inittab);
     int ij = init.get_empty_coords();
 
     boost::heap::fibonacci_heap<State*, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>    opened;
@@ -51,6 +55,7 @@ int main(int argc, char const *argv[])
     {
         State *curr = opened.top();
         opened.pop();
+        std::cout << "Problème.\n" << curr->board.toString() << std::endl;
         curr->isclosed = true;
 
         int i0 = curr->i0;
