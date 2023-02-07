@@ -3,40 +3,58 @@
 #include <cstdlib>
 #include <queue>
 #include <unordered_map>
+#include "/usr/include/boost/heap/fibonacci_heap.hpp"
+#include <iostream>
+#include <sstream>
+#include <cmath>
+std::vector<int> parse(const char *arg);
 
-
-
-int get_empty_coords(int *board)
+void print_res(State *curr)
 {
-    for (int i = 0; i < 12; i++) {
-        if (board[i] == 0)
-            return i;
-    }
-    return -1;
+    std::stringstream res;
+
+    if (!curr->parent)
+        return;
+    res << curr->i0 << ' ' << curr->j0 << std::endl;
+    print_res(curr->parent);
+    std::cout << res.str();
 }
 
 int main(int argc, char const *argv[])
 {
-    int n = 4;
-    Board init((int[12]){4, 3, 1, 7,    0, 9, 2, 6,     5, 8, 10, 11});
+    (void) argc;
+    (void) argv;
+    if (argc != 2)
+    {
+        std::cout << "Usage:" << std::endl;
+        std::cout << "\tn-puzzle n       <--  randomly generates board of size n * n and solve it" << std::endl;
+        std::cout << "    or" << std::endl;
+        std::cout << "\tn-puzzle file    <--  parse file and solve it" << std::endl;
+        return 0;
+    }
+    std::vector<int> board = parse(argv[1]);
+    int n = sqrt(board.size());
+
+    int inittab[12] = {4, 9, 0, 5,   10, 7, 1, 2,   11, 8, 3, 6};
+    Board init(inittab);
     int ij = init.get_empty_coords();
 
+    boost::heap::fibonacci_heap<State*, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>    opened;
+    std::allocator<std::pair<Board, State>> a;
+    std::unordered_map<std::string, State> all(a);
 
-    std::priority_queue<State> opened;
-    // std::unordered_map<int[12], State&> openedmap;
-    std::vector<State*> closed;
-
-
-    opened.emplace(init, ij / n, ij % n, (State*)NULL, 0);
-    // openedmap.insert(board, (State&)opened.top());
+    State state(init, ij / n, ij % n, (State*)NULL, 0);
+    all.emplace(init.toString(), state); // double copie
+    all[init.toString()].handle = opened.push(&all[init.toString()]);
 
     while (!opened.empty())
     {
-        const State &curr = opened.top();
+        State *curr = opened.top();
         opened.pop();
+        curr->isclosed = true;
 
-        int i0 = curr.i0;
-        int j0 = curr.j0;
+        int i0 = curr->i0;
+        int j0 = curr->j0;
         for (int dr = 0; dr < 4; dr++)
         {
             int new_i = i0 + (dr == 2) - (dr == 0);
@@ -46,22 +64,32 @@ int main(int argc, char const *argv[])
             if (!(0 <= new_j && new_j < 4))
                 continue;
 
-            Board newboard = curr.board.move(i0, j0, new_i, new_j);
+            Board newboard((curr->board).move(i0, j0, new_i, new_j));
 
             if (newboard.istarget())
             {
-                printf("trouvé\n");
-                // print_res(curr);
-                printf("%d, %d\n", new_i, new_j);
+                // printf("trouvé\n");
+                // print_res(curr->;
+                print_res(curr);
+                printf("%d %d\n", new_i, new_j);
+                all.clear();
+                opened.clear();
                 exit(0);
             }
 
-            // if h not in openset:
-            //     openset[h] = State(f+1, newboard, new_empty, curr)
-            //     heapq.heappush(opened, openset[h])
-            // elif f+1 < openset[h].f:
-            //     openset[h].f = f+1
-            //     heapq.heapify(opened)
+            if (all.count(newboard.toString())) {
+                State &tomodify = all[newboard.toString()];
+                if (!tomodify.isclosed && tomodify.f > curr->f + 1)
+                {
+                    (*tomodify.handle)->f = curr->f + 1;
+                    opened.increase(tomodify.handle);
+                }
+            }
+            else    {
+                State state(newboard, new_i, new_j, curr, curr->f + 1);
+                all.emplace(newboard.toString(), state);
+                all[newboard.toString()].handle = opened.push(&all[newboard.toString()]);
+            }
         }
     }
 
