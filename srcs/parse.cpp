@@ -13,7 +13,7 @@ std::vector<int> parse_file(const char *arg)
         file.close();
         exit(1);
     }
-    int n;
+    int n = 0;
     file >> n;
     if (file.fail())
     {
@@ -34,12 +34,13 @@ std::vector<int> parse_file(const char *arg)
         }
         res.push_back(k);
     }
-    if (res.size() != n * n)
+    if (n == 0 || res.size() != n * n)
     {
         std::cout << "Parse Error\n";
         file.close();
         exit(1);
     }
+    std::cout << n << res.size() << std::endl;
     return res;
 }
 
@@ -47,6 +48,7 @@ std::vector<int> generate_board(int n)
 {
     std::vector<int>    res;
 
+    srand(time(NULL));
     for (int i = 0; i < n*n; i++)
     {
         res.push_back(i);
@@ -59,6 +61,7 @@ std::vector<int> generate_board(int n)
             res[i] = res[i + j];
             res[i + j] = swap;
         }
+        std::cout << res[i] << std::endl;
     }
     return res;
 }

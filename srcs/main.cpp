@@ -32,13 +32,14 @@ int main(int argc, char const *argv[])
         return 0;
     }
 
-    Board init = parse(argv[1]);
+    Board init(parse(argv[1]));
+    std::cout << init.size << init.tab.size() << std::endl;
     if (!init.is_solvable())
     {
         std::cout << "Not solvable." << std::endl;
         return 0;
     }
-    int n = init.size();
+    int n = init.size;
     // int inittab[12] = {4, 9, 0, 5,   10, 7, 1, 2,   11, 8, 3, 6};
     // Board init(inittab);
     int ij = init.get_empty_coords();
@@ -64,9 +65,9 @@ int main(int argc, char const *argv[])
         {
             int new_i = i0 + (dr == 2) - (dr == 0);
             int new_j = j0 + (dr == 1) - (dr == 3);
-            if (!(0 <= new_i && new_i < 3))
+            if (!(0 <= new_i && new_i < n))
                 continue;
-            if (!(0 <= new_j && new_j < 4))
+            if (!(0 <= new_j && new_j < n))
                 continue;
 
             Board newboard((curr->board).move(i0, j0, new_i, new_j));

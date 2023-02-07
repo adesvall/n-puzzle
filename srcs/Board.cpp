@@ -7,15 +7,8 @@ Board::Board()
 {}
 
 Board::Board(std::vector<int> tab) : tab(tab)
-{}
-
-// Board::Board(Board& ref) : Board(ref.tab)
-// {}
-
-
-int Board::size()   const
 {
-    return sqrt(tab.size());
+    size = (int)sqrt(tab.size());
 }
 
 int Board::number_of_inversions()  const
@@ -24,35 +17,64 @@ int Board::number_of_inversions()  const
 
     for (size_t i = 0; i < tab.size(); i++)
     {
-        for (size_t j = i + 1; j < tab.size(); j++)
-            count += tab[i] > tab[j];
+        for (size_t j = i + 1; j < tab.size() && tab[i]; j++)
+            count += (tab[i] > tab[j] && tab[j]);
     }
     return count;
 }
 
 bool Board::is_solvable() const
 {
-    int n = size();
+    int n = size;
+    int inv = number_of_inversions();
 
     if (n % 2)
-        return number_of_inversions() % 2 == 0;
+        return inv % 2 == 0;
     else
     {
         int ij = get_empty_coords();
         int row = ij / n;
-        return row % 2 != number_of_inversions() % 2;
+        return row % 2 != inv % 2;
     }
+}
+
+int Board::linear_conflicts()  const
+{
+    int count = 0;
+
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            if (tab[size * i + j] && tab[size * i + j] % size == j)
+                for (size_t i2 = i + 1; i2 < size; i2++)
+                {
+                    if (tab[size * i2 + j] && tab[size * i2 + j] % size == j
+                    && tab[size * i2 + j] < tab[size * i + j])
+                        count++;
+                }
+
+            if (tab[size * i + j] && tab[size * i + j] / size == i)
+                for (size_t j2 = j + 1; j2 < size; j2++)
+                {
+                    if (tab[size * i + j2] && tab[size * i + j2] / size == i
+                    && tab[size * i + j2] < tab[size * i + j])
+                        count++;
+                }
+        }
+    }
+    return count;
 }
 
 float Board::estimate_cost() const
 {
-    float res = 0;
-    int n = size();
+    float res = 2 * linear_conflicts();
+    int n = size;
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            int dist = abs(i - tab[4*i+j] / 4) + abs(j - tab[4*i+j] % 4);
-            res += dist;
+            int dist = abs(i - tab[n*i+j] / n) + abs(j - tab[n*i+j] % n);
+            res += dist * (tab[n*i+j] != 0);
         }
     }
     return res;
@@ -62,8 +84,8 @@ Board Board::move(int i0, int j0, int new_i, int new_j)   const
 {
     Board res(this->tab);
 
-    res.tab[4 * i0 + j0] = res.tab[4 * new_i + new_j];
-    res.tab[4 * new_i + new_j] = 0;
+    res.tab[size * i0 + j0] = res.tab[size * new_i + new_j];
+    res.tab[size * new_i + new_j] = 0;
     return res;
 }
 
@@ -86,16 +108,6 @@ bool Board::istarget()  const
     return true;
 }
 
-// bool Board::operator==(Board &rhs) const   {
-    
-//     for (int i = 0; i < 12; i++)
-//     {
-//         if (tab[i] != rhs.tab[i])
-//             return false;
-//     }
-//     return true;
-// }
-
 std::string Board::toString()  const
 {
     std::stringstream stream;
@@ -103,7 +115,7 @@ std::string Board::toString()  const
     for (size_t i = 0; i < tab.size(); i++)
     {
         stream << tab[i];
-        if ((i+1) % size() == 0)
+        if ((i+1) % size == 0)
             stream << '\n';
         else
             stream << ',';    
