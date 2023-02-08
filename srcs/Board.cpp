@@ -18,7 +18,7 @@ int Board::number_of_inversions()  const
     for (size_t i = 0; i < tab.size(); i++)
     {
         for (size_t j = i + 1; j < tab.size() && tab[i]; j++)
-            count += (tab[i] > tab[j] && tab[j]);
+            count += ((tab[i] > tab[j]) && tab[j]);
     }
     return count;
 }

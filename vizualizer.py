@@ -1,15 +1,7 @@
 
 from tkinter import *
 from PIL import ImageTk, Image
-import sys
-
-raw = Image.open("batiment.jpeg")
-height = raw.height
-width = raw.width
-
-root = Tk()
-cnv = Canvas(root, width=width, height=height)
-cnv.pack()
+import sys, time
 
 def parse_board(file):
     boardfile = open(file, "r")
@@ -28,51 +20,62 @@ def parse_board(file):
                 nt = []
     return res, n
 
+def read_moves():
+    return [list(map(int, line.split())) for line in sys.stdin]
+
 def empty_coords(t):
     for i in range(len(t)):
         if 0 in t[i]:
             return i, t[i].index(0)
     return 0, 0
 
-board, n = parse_board(sys.argv[1])
-target = [[n*i+j for j in range(n)] for i in range(n)]
-i0, j0 = empty_coords(board)
+def launch():
+    t = 0
+    for i,j in moves:
+        cnv.after(t*100, boardmove, i, j)
+        t += 1
 
-cx = width / n
-cy = height / n
-imgtab = [[ImageTk.PhotoImage(raw.crop((j * cx, i * cy, (j+1) * cx, (i+1) * cy))) for j in range(n)] for i in range(n)]
-
-objboard = [ [ cnv.create_image(cx * j, cy * i, image=imgtab[board[i][j] // n][board[i][j] % n], anchor="nw") if (i+j)!=0 else None for j in range(n) ] for i in range(n) ]
-
-def soft_move(obj, dx, dy):
-    f = lambda c : cnv.move(obj, dx*c, dy*c)
+def soft_move(obj, newx, newy):
     x, y = cnv.coords(obj)
+    dx, dy = newx - x, newy - y
+    f = lambda c : cnv.move(obj, dx*c, dy*c)
 
     for i in range(10):
         mv = 1 - (i / 10)**2
         cnv.after(i*10, f, mv / 7.15)
 
-    cnv.after(100, lambda : cnv.moveto(obj, x+dx, y+dy))
+    cnv.after(101, lambda : cnv.moveto(obj, newx, newy))
 
-def move(dx, dy):
+def boardmove(newi, newj):
     global i0, j0
-    newi, newj = i0 - dy, j0 - dx
-    if newi < 0 or newi >= n or newj < 0 or newj >= n:
+    dx, dy = j0-newj, i0-newi
+    print("move", dx, dy)
+    if (abs(dx) != 1 and abs(dy) != 1) or (dx and dy):
+        print("invalid_move")
         return
-    obj = objboard[newi][newj]
-    objboard[newi][newj], objboard[i0][j0] = objboard[i0][j0], objboard[newi][newj]
+    if newi < 0 or newi >= n or newj < 0 or newj >= n:
+        print("invalid_move: out")
+        return
+    obj = objboard[board[newi][newj]]
     board[newi][newj], board[i0][j0] = board[i0][j0], board[newi][newj]
+    soft_move(obj, j0 * cx, i0 * cy)
     i0, j0 = newi, newj
-    soft_move(obj, dx * cx, dy * cy)
+    # print(board)
     if board == target:
         print("You win !")
-        exit()
+        # exit()
+    
+    
 
 def key_press(event):
     code = event.keycode
+    global i0, j0
     if event.char == 'q':
         root.destroy()
         exit()
+    elif event.char == 'p':
+        launch()
+        return
     dx, dy = 0, 0
     if code == 113:
         print('left')
@@ -86,8 +89,37 @@ def key_press(event):
     elif code == 116:
         print('down')
         dy += 1
-    move(dx, dy)
+    boardmove(i0-dy, j0-dx)
+
+board, n = parse_board(sys.argv[1])
+target = [[n*i+j for j in range(n)] for i in range(n)]
+# board = target
+i0, j0 = empty_coords(board)
+
+moves = read_moves()
+
+raw = Image.open("batiment.jpeg").reduce(2)
+height = raw.height
+width = raw.width
+
+root = Tk()
+cnv = Canvas(root, width=width, height=height)
+cnv.pack()
+
+cx = width / n
+cy = height / n
+imgtab = []
+for i in range(n):
+    for j in range(n):
+        imgtab.append(ImageTk.PhotoImage(raw.crop((j * cx, i * cy, (j+1) * cx, (i+1) * cy))))
+objboard = [None] * (n*n)
+for j in range(n):
+    for i in range(n):
+        if board[i][j]:
+            objboard[board[i][j]] = cnv.create_image(j * cx, i * cy, image=imgtab[board[i][j]], anchor="nw")
+
 
 root.bind('<KeyPress>', key_press)
 
+# cnv.after(1000, launch)
 root.mainloop()

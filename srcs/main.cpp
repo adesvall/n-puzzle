@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
     }
 
     Board init(parse(argv[1]));
-    std::cout << init.size << init.tab.size() << std::endl;
+    // std::cout << init.size << init.tab.size() << std::endl;
     if (!init.is_solvable())
     {
         std::cout << "Not solvable." << std::endl;
@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
     {
         State *curr = opened.top();
         opened.pop();
-        std::cout << "Problème.\n" << curr->board.toString() << std::endl;
+        // std::cout << "Problème.\n" << curr->board.toString() << std::endl;
         curr->isclosed = true;
 
         int i0 = curr->i0;
