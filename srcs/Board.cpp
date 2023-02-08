@@ -68,7 +68,7 @@ int Board::linear_conflicts()  const
 
 float Board::estimate_cost() const
 {
-    float res = 2 * linear_conflicts();
+    float res = 2*linear_conflicts();
     int n = size;
 
     for (int i = 0; i < n; i++) {

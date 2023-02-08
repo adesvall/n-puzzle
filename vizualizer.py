@@ -49,7 +49,7 @@ def soft_move(obj, newx, newy):
 def boardmove(newi, newj):
     global i0, j0
     dx, dy = j0-newj, i0-newi
-    print("move", dx, dy)
+    # print("move", dx, dy)
     if (abs(dx) != 1 and abs(dy) != 1) or (dx and dy):
         print("invalid_move")
         return

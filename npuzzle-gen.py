@@ -20,7 +20,7 @@ def make_puzzle(s, solvable, iterations):
 		p[idx] = p[swi]
 		p[swi] = 0
 	
-	p = make_goal(s)
+	p = [i for i in range(s*s)]
 	for i in range(iterations):
 		swap_empty(p)
 	

@@ -17,7 +17,7 @@ class State
 public:
 
     int     f;
-    int     g;
+    float     g;
     Board   board;
     int     i0;
     int     j0;

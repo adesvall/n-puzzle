@@ -21,8 +21,6 @@ void print_res(State *curr)
 
 int main(int argc, char const *argv[])
 {
-    (void) argc;
-    (void) argv;
     if (argc != 2)
     {
         std::cout << "Usage:" << std::endl;
@@ -34,7 +32,7 @@ int main(int argc, char const *argv[])
 
     Board init(parse(argv[1]));
     // std::cout << init.size << init.tab.size() << std::endl;
-    if (!init.is_solvable())
+    if (false && !init.is_solvable())
     {
         std::cout << "Not solvable." << std::endl;
         return 0;
@@ -54,11 +52,26 @@ int main(int argc, char const *argv[])
 
     while (!opened.empty())
     {
+        // std::cout << "size:" << opened.size() << std::endl;
+        // if (opened.size() >= 100)
+        // {
+        //     for (int i=0; i<100; i++)
+        //     {
+        //         std::cout << opened.top()->f + opened.top()->g << std::endl;
+        //         opened.pop();
+        //     }
+        //     exit(1);
+        // }
         State *curr = opened.top();
         opened.pop();
-        // std::cout << "Problème.\n" << curr->board.toString() << std::endl;
+        if (true)
+        {
+            std::cout << "opened : " << opened.size() << "  all: " << all.size() << std::endl;
+            std::cout << curr->f << " " << curr->g << std::endl;
+        }
         curr->isclosed = true;
-
+        // if (curr->f == 6)
+        //     exit(100);
         int i0 = curr->i0;
         int j0 = curr->j0;
         for (int dr = 0; dr < 4; dr++)
@@ -71,8 +84,9 @@ int main(int argc, char const *argv[])
                 continue;
 
             Board newboard((curr->board).move(i0, j0, new_i, new_j));
+            // std::cout << newboard.toString() << std::endl;
 
-            if (newboard.istarget())
+            if (newboard.toString() == "0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n")
             {
                 // printf("trouvé\n");
                 // print_res(curr->;
@@ -88,7 +102,7 @@ int main(int argc, char const *argv[])
                 if (!tomodify.isclosed && tomodify.f > curr->f + 1)
                 {
                     (*tomodify.handle)->f = curr->f + 1;
-                    opened.increase(tomodify.handle);
+                    opened.update(tomodify.handle);
                 }
             }
             else    {
