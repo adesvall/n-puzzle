@@ -1,5 +1,5 @@
 #include "Board.hpp"
-#include "/usr/include/boost/heap/fibonacci_heap.hpp"
+#include <boost/heap/fibonacci_heap.hpp>
 
 template <typename T>
 class PointerCompare
