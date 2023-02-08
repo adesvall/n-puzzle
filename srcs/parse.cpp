@@ -13,7 +13,7 @@ std::vector<int> parse_file(const char *arg)
         file.close();
         exit(1);
     }
-    int n = 0;
+    size_t n = 0;
     file >> n;
     if (file.fail())
     {

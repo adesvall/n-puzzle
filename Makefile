@@ -9,16 +9,16 @@ SRCS		= $(addprefix srcs/, $(PURESRCS))
 
 OBJS		= $(addprefix objs/, $(PURESRCS:.cpp=.o))
 
-CFLAGS		= -Wall -Wextra -Werror -I. -fsanitize=address -g
+CFLAGS		= -Wall -Wextra -Werror -I. -fsanitize=address -g -I../boost/boost
 
 all:		${NAME}
 
 $(NAME):	${OBJS}
-			g++ ${CFLAGS} -o ${NAME} ${OBJS}
+			c++ ${CFLAGS} -o ${NAME} ${OBJS}
 
 objs/%.o:	srcs/%.cpp
 			@mkdir -p objs
-			g++ $(CFLAGS) -o $@ -c $<
+			c++ $(CFLAGS) -o $@ -c $<
 
 clean:
 			rm -rf objs

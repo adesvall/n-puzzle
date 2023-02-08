@@ -1,26 +1,72 @@
 
-from tkinter import Tk, Canvas, Label
-from PIL import ImageTk, Image 
+from tkinter import *
+from PIL import ImageTk, Image
+import sys
 
-# image1 = Image.open("batiment.jpeg")
-height = 720
-width = 1080
-n = 4
-board = [[4*i+j for j in range(n)] for i in range(n)]
+raw = Image.open("batiment.jpeg")
+height = raw.height
+width = raw.width
 
 root = Tk()
 cnv = Canvas(root, width=width, height=height)
 cnv.pack()
 
-# test = ImageTk.PhotoImage(image1)
+def parse_board(file):
+    boardfile = open(file, "r")
+    t = boardfile.read().split('\n')
+    if t[0][0] == '#':
+        t = t[1:]
+    n = int(t[0])
+    t = t[1:]
+    nt = []
+    res = []
+    for a in t:
+        if a != '':
+            nt.append(int(a))
+            if len(nt) == n:
+                res.append(nt)
+                nt = []
+    return res, n
 
-# label1 = Label(image=test)
-# # label1.image = test
+def empty_coords(t):
+    for i in range(len(t)):
+        if 0 in t[i]:
+            return i, t[i].index(0)
+    return 0, 0
 
-# # Position image
-# label1.place(x=0, y=0, relwidth=width / image1.width, relheight=image1.height / height)
+board, n = parse_board(sys.argv[1])
+target = [[n*i+j for j in range(n)] for i in range(n)]
+i0, j0 = empty_coords(board)
 
-# # cnv.create_rectangle(20, 20, 80, 80, fill='red', outline='')
+cx = width / n
+cy = height / n
+imgtab = [[ImageTk.PhotoImage(raw.crop((j * cx, i * cy, (j+1) * cx, (i+1) * cy))) for j in range(n)] for i in range(n)]
+
+objboard = [ [ cnv.create_image(cx * j, cy * i, image=imgtab[board[i][j] // n][board[i][j] % n], anchor="nw") if (i+j)!=0 else None for j in range(n) ] for i in range(n) ]
+
+def soft_move(obj, dx, dy):
+    f = lambda c : cnv.move(obj, dx*c, dy*c)
+    x, y = cnv.coords(obj)
+
+    for i in range(10):
+        mv = 1 - (i / 10)**2
+        cnv.after(i*10, f, mv / 7.15)
+
+    cnv.after(100, lambda : cnv.moveto(obj, x+dx, y+dy))
+
+def move(dx, dy):
+    global i0, j0
+    newi, newj = i0 - dy, j0 - dx
+    if newi < 0 or newi >= n or newj < 0 or newj >= n:
+        return
+    obj = objboard[newi][newj]
+    objboard[newi][newj], objboard[i0][j0] = objboard[i0][j0], objboard[newi][newj]
+    board[newi][newj], board[i0][j0] = board[i0][j0], board[newi][newj]
+    i0, j0 = newi, newj
+    soft_move(obj, dx * cx, dy * cy)
+    if board == target:
+        print("You win !")
+        exit()
 
 def key_press(event):
     code = event.keycode
@@ -42,22 +88,6 @@ def key_press(event):
         dy += 1
     move(dx, dy)
 
-def key_release(event):
-    # print(int(event.keycode))
-    pass
-
 root.bind('<KeyPress>', key_press)
-root.bind('<KeyRelease>', key_release)
-
-objboard = cnv.create_rectangle(100, 20, 100+42, 20+42, fill='blue', outline='')
-
-def move(dx, dy):
-    cnv.move(objboard, dx*42, dy*42)
-
-# def effacer(c):
-#     cnv.create_rectangle(100, 20, 100+c, 20+c, fill='white', outline='')
-#     cnv.after(1000, dessiner, c)
-
-# cnv.after(1000, dessiner, 42)
 
 root.mainloop()
