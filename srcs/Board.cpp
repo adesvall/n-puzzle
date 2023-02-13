@@ -4,12 +4,14 @@
 #include <cmath>
 
 Board::Board()
+{}
+Board::Board(int n)
 {
-    for (int i = 0; i < 16; i++)
+    size = n;
+    for (int i = 0; i < n*n; i++)
     {
         tab.push_back(i);
     }
-    size = 4;
 }
 
 Board::Board(std::vector<int> tab) : tab(tab)
@@ -153,7 +155,7 @@ std::string Board::toString(bool fringe)  const
     for (size_t i = 0; i < tab.size(); i++)
     {
 
-        if (!fringe || isFringe(tab[i], size))
+        if (!fringe || isFringe(tab[i], size) || !tab[i])
             stream << tab[i];
         else
             stream << '*';

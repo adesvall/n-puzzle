@@ -38,14 +38,14 @@ int main(int argc, char const *argv[])
         return 0;
     }
     int n = init.size;
-    // int inittab[12] = {4, 9, 0, 5,   10, 7, 1, 2,   11, 8, 3, 6};
-    // Board init(inittab);
-    int ij = init.get_empty_coords();
+    // std::string goalstr =  "0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n";
+    std::string goalstr =  "0,1,2\n3,4,5\n6,7,8\n";
 
     boost::heap::fibonacci_heap<State*, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>    opened;
     std::allocator<std::pair<Board, State>> a;
     std::unordered_map<std::string, State> all(a);
 
+    int ij = init.get_empty_coords();
     State state(init, ij / n, ij % n, (State*)NULL, 0);
     all.emplace(init.toString(), state); // double copie
     all[init.toString()].handle = opened.push(&all[init.toString()]);
@@ -53,11 +53,11 @@ int main(int argc, char const *argv[])
     while (!opened.empty())
     {
 
-        if (all.count("0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n"))
+        if (all.count(goalstr))
         {
             // printf("trouvé\n");
             // print_res(curr->;
-            State* curr = &all["0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n"];
+            State* curr = &all[goalstr];
             print_res(curr);
             all.clear();
             opened.clear();
@@ -78,7 +78,8 @@ int main(int argc, char const *argv[])
         if (true)
         {
             std::cout << "opened : " << opened.size() << "  all: " << all.size() << std::endl;
-            std::cout << curr->board.toString() << curr->g << " " << curr->h << std::endl;
+            // std::cout << curr->board.toString();
+            std::cout << curr->g << " " << curr->h << std::endl;
         }
         curr->isclosed = true;
         // if (curr->f == 6)
@@ -102,6 +103,6 @@ int main(int argc, char const *argv[])
             }
         }
     }
-    std::cout << all.count("0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n") << std::endl;
+    std::cout << "Fatal no solution found after exploring everything." << std::endl;
     return 0;
 }

@@ -1,6 +1,10 @@
 #include "State.hpp"
 
+
 State::State()
+{}
+
+State::State(int n) : board(n)
 {}
 
 State::State(Board board, int i0, int j0, const State* parent, int g)

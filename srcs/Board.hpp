@@ -7,6 +7,7 @@ struct Board
     size_t size;
 
     Board();
+    Board(int n);
     Board(std::vector<int> tab);
     // Board(Board& ref);
     bool is_solvable()  const;
