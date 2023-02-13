@@ -8,7 +8,7 @@
 #include <sstream>
 std::vector<int> parse(const char *arg);
 
-void print_res(State *curr)
+void print_res(const State *curr)
 {
     std::stringstream res;
 
@@ -52,6 +52,17 @@ int main(int argc, char const *argv[])
 
     while (!opened.empty())
     {
+
+        if (all.count("0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n"))
+        {
+            // printf("trouvé\n");
+            // print_res(curr->;
+            State* curr = &all["0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n"];
+            print_res(curr);
+            all.clear();
+            opened.clear();
+            exit(0);
+        }
         // std::cout << "size:" << opened.size() << std::endl;
         // if (opened.size() >= 100)
         // {
@@ -67,51 +78,30 @@ int main(int argc, char const *argv[])
         if (true)
         {
             std::cout << "opened : " << opened.size() << "  all: " << all.size() << std::endl;
-            std::cout << curr->f << " " << curr->g << std::endl;
+            std::cout << curr->board.toString() << curr->g << " " << curr->h << std::endl;
         }
         curr->isclosed = true;
         // if (curr->f == 6)
         //     exit(100);
-        int i0 = curr->i0;
-        int j0 = curr->j0;
-        for (int dr = 0; dr < 4; dr++)
+        std::vector<State> neighbors = curr->getNeibours();
+        for (std::vector<State>::iterator it = neighbors.begin(); it != neighbors.end(); it++)
         {
-            int new_i = i0 + (dr == 2) - (dr == 0);
-            int new_j = j0 + (dr == 1) - (dr == 3);
-            if (!(0 <= new_i && new_i < n))
-                continue;
-            if (!(0 <= new_j && new_j < n))
-                continue;
+            std::string newboard = it->board.toString();
 
-            Board newboard((curr->board).move(i0, j0, new_i, new_j));
-            // std::cout << newboard.toString() << std::endl;
-
-            if (newboard.toString() == "0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n")
-            {
-                // printf("trouvé\n");
-                // print_res(curr->;
-                print_res(curr);
-                printf("%d %d\n", new_i, new_j);
-                all.clear();
-                opened.clear();
-                exit(0);
-            }
-
-            if (all.count(newboard.toString())) {
-                State &tomodify = all[newboard.toString()];
-                if (!tomodify.isclosed && tomodify.f > curr->f + 1)
+            if (all.count(newboard)) {
+                State &tomodify = all[newboard];
+                if (!tomodify.isclosed && tomodify.g > curr->g + 1)
                 {
-                    (*tomodify.handle)->f = curr->f + 1;
+                    (*tomodify.handle)->g = curr->g + 1;
                     opened.update(tomodify.handle);
                 }
             }
             else    {
-                State state(newboard, new_i, new_j, curr, curr->f + 1);
-                all.emplace(newboard.toString(), state);
-                all[newboard.toString()].handle = opened.push(&all[newboard.toString()]);
+                all.emplace(newboard, *it);
+                all[newboard].handle = opened.push(&all[newboard]);
             }
         }
     }
-
+    std::cout << all.count("0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n") << std::endl;
     return 0;
 }

@@ -1,0 +1,29 @@
+Partitioning: 
+on calcule la distance de Manhattan de chaque case à sa position finale
+et on fait deux sommes:
+- une pour les tuile dont la position finale se trouve sur la bordure droite-bas
+- une pour les autres
+on designe alors le cout comme max(somme1, somme2)
+
+./n-puzzle puzzles/hard4.puzzle
+
+avec + linear_conflicts(true)
+268,53s user 14,90s system 99% cpu 4:43,77 total
+
+et + linear_conflicts()
+256,41s user 14,63s system 99% cpu 4:31,78 total
+
+avec cout = 2 * max(somme1, somme2)
+262,33s user 14,72s system 99% cpu 4:38,63 total
+
+./n-puzzle puzzles/normal4.puzzle
+49,20s user 2,92s system 98% cpu 52,683 total
+
+./n-puzzle puzzles/easy4.puzzle
+18,16s user 1,07s system 99% cpu 19,394 total
+
+
+
+
+e(x) = 2 * 4 / 16 + 4 * 4 / 16 + 8 * 4 / 16 = 3.5
+ratio = 9232897 / 4199164 = 2.2

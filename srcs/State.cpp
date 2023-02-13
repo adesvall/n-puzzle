@@ -3,27 +3,43 @@
 State::State()
 {}
 
-State::State(Board board, int i0, int j0, State* parent, int f)
-: f(f), board(board), i0(i0), j0(j0), parent(parent), isclosed(false)
+State::State(Board board, int i0, int j0, const State* parent, int g)
+: g(g), board(board), i0(i0), j0(j0), parent(parent), isclosed(false)
 {
-    g = board.estimate_cost();
+    h = board.estimate_cost();
 }
 
 State::~State()
 {}
 
-
-bool State::operator<(const State& rhs) const
+std::vector<State> State::getNeibours() const
 {
-    if (g == rhs.g)
-        return f > rhs.f;
-    return g > rhs.g;
-    
-    if (f + g == rhs.f + rhs.g)
-        return g > rhs.g;
-    return f + g > rhs.f + rhs.g; 
+    std::vector<State> res;
+
+    for (int dr = 0; dr < 4; dr++)
+    {
+        int new_i = i0 + (dr == 2) - (dr == 0);
+        int new_j = j0 + (dr == 1) - (dr == 3);
+        if (!(0 <= new_i && new_i < (int)board.size))
+            continue;
+        if (!(0 <= new_j && new_j < (int)board.size))
+            continue;
+        State state(board.move(i0, j0, new_i, new_j), new_i, new_j, this, g + 1);
+        res.push_back(state);
+    }
+    return res;
 }
 
 
-// e(x) = 2 * 4 / 16 + 4 * 4 / 16 + 8 * 4 / 16 = 3.5
-// ratio = 9232897 / 4199164 = 2.2
+bool State::operator<(const State& rhs) const
+{
+    // if (h == rhs.h)
+    //     return g > rhs.g;
+    // return h > rhs.h;
+    
+    if (g + h == rhs.g + rhs.h)
+        return h > rhs.h;
+    return g + h > rhs.g + rhs.h; 
+}
+
+

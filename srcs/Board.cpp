@@ -4,7 +4,13 @@
 #include <cmath>
 
 Board::Board()
-{}
+{
+    for (int i = 0; i < 16; i++)
+    {
+        tab.push_back(i);
+    }
+    size = 4;
+}
 
 Board::Board(std::vector<int> tab) : tab(tab)
 {
@@ -34,11 +40,16 @@ bool Board::is_solvable() const
     {
         int ij = get_empty_coords();
         int row = ij / n;
-        return row % 2 != inv % 2;
+        return row % 2 == inv % 2;
     }
 }
 
-int Board::linear_conflicts()  const
+int isFringe(int k, int size)
+{
+    return k % size == size-1 || k / size == size - 1;
+}
+
+int Board::linear_conflicts(bool partition)  const
 {
     int count = 0;
 
@@ -50,7 +61,8 @@ int Board::linear_conflicts()  const
                 for (size_t i2 = i + 1; i2 < size; i2++)
                 {
                     if (tab[size * i2 + j] && tab[size * i2 + j] % size == j
-                    && tab[size * i2 + j] < tab[size * i + j])
+                    && tab[size * i2 + j] < tab[size * i + j]
+                    && (!partition || isFringe(tab[size * i2 + j], size) == isFringe(tab[size * i + j], size)))
                         count++;
                 }
 
@@ -58,7 +70,8 @@ int Board::linear_conflicts()  const
                 for (size_t j2 = j + 1; j2 < size; j2++)
                 {
                     if (tab[size * i + j2] && tab[size * i + j2] / size == i
-                    && tab[size * i + j2] < tab[size * i + j])
+                    && tab[size * i + j2] < tab[size * i + j]
+                    && (!partition || isFringe(tab[size * i + j2], size) == isFringe(tab[size * i + j], size)))
                         count++;
                 }
         }
@@ -66,8 +79,33 @@ int Board::linear_conflicts()  const
     return count;
 }
 
+float Board::partition_cost()  const
+{
+    float resFringe = 0;
+    float resInside = 0;
+    
+    resFringe = 2 * linear_conflicts();
+    resInside = resFringe;
+    for (size_t i = 0; i < size; i++)
+    {
+        for (size_t j = 0; j < size; j++)
+        {
+            int dist = abs(i - tab[size*i+j] / size) + abs(j - tab[size*i+j] % size);
+            if (isFringe(tab[i*size+j], size))
+                resFringe += dist;
+            else if (tab[i*size+j])
+                resInside += dist;
+        }
+    }
+
+    if (resFringe > resInside)
+        return resFringe;
+    return resInside;
+}
+
 float Board::estimate_cost() const
 {
+    // return partition_cost();
     float res = 2*linear_conflicts();
     int n = size;
 
@@ -108,13 +146,17 @@ bool Board::istarget()  const
     return true;
 }
 
-std::string Board::toString()  const
+std::string Board::toString(bool fringe)  const
 {
     std::stringstream stream;
 
     for (size_t i = 0; i < tab.size(); i++)
     {
-        stream << tab[i];
+
+        if (!fringe || isFringe(tab[i], size))
+            stream << tab[i];
+        else
+            stream << '*';
         if ((i+1) % size == 0)
             stream << '\n';
         else
@@ -122,6 +164,7 @@ std::string Board::toString()  const
     }
     return stream.str();
 }
+
 
 // namespace std
 // {

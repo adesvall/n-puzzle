@@ -16,19 +16,20 @@ class State
 {
 public:
 
-    int     f;
-    float     g;
+    int     g;
+    float     h;
     Board   board;
     int     i0;
     int     j0;
-    State   *parent;
+    const State   *parent;
     bool    isclosed;
     boost::heap::fibonacci_heap<State *, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>::handle_type handle;
 
 public:
     State();
-    State(Board board, int i0, int j0, State* parent, int f );
+    State(Board board, int i0, int j0, const State* parent, int g );
     ~State();
+    std::vector<State> getNeibours() const;
     bool operator<(const State& rhs) const;
 };
 
