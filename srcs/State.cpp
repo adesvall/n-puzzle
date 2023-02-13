@@ -16,7 +16,7 @@ State::State(Board board, int i0, int j0, const State* parent, int g)
 State::~State()
 {}
 
-std::vector<State> State::getNeibours() const
+std::vector<State> State::getNeighbors() const
 {
     std::vector<State> res;
 
@@ -28,6 +28,8 @@ std::vector<State> State::getNeibours() const
             continue;
         if (!(0 <= new_j && new_j < (int)board.size))
             continue;
+        // if (parent && parent->i0 == new_i && parent->j0 == new_j)
+        //     continue;
         State state(board.move(i0, j0, new_i, new_j), new_i, new_j, this, g + 1);
         res.push_back(state);
     }

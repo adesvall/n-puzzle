@@ -84,7 +84,7 @@ int main(int argc, char const *argv[])
         curr->isclosed = true;
         // if (curr->f == 6)
         //     exit(100);
-        std::vector<State> neighbors = curr->getNeibours();
+        std::vector<State> neighbors = curr->getNeighbors();
         for (std::vector<State>::iterator it = neighbors.begin(); it != neighbors.end(); it++)
         {
             std::string newboard = it->board.toString();
@@ -94,6 +94,7 @@ int main(int argc, char const *argv[])
                 if (!tomodify.isclosed && tomodify.g > curr->g + 1)
                 {
                     (*tomodify.handle)->g = curr->g + 1;
+                    (*tomodify.handle)->parent = curr;
                     opened.update(tomodify.handle);
                 }
             }

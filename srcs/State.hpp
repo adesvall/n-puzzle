@@ -30,7 +30,7 @@ public:
     State(int n);
     State(Board board, int i0, int j0, const State* parent, int g );
     ~State();
-    std::vector<State> getNeibours() const;
+    std::vector<State> getNeighbors() const;
     bool operator<(const State& rhs) const;
 };
 
