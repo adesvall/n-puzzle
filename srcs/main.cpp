@@ -1,16 +1,20 @@
 #include "main.hpp"
 #include <cstdio>
+#include <fstream>
 #include <cstdlib>
+
+void recursive_print(const State *curr, std::ofstream& out)
+{
+    if (!curr->parent)
+        return;
+    recursive_print(curr->parent, out);
+    out << curr->i0 << ' ' << curr->j0 << std::endl;
+}
 
 void print_res(const State *curr)
 {
-    std::stringstream res;
-
-    if (!curr->parent)
-        return;
-    res << curr->i0 << ' ' << curr->j0 << std::endl;
-    print_res(curr->parent);
-    std::cout << res.str();
+    std::ofstream out("sol.txt");
+    recursive_print(curr, out);
 }
 
 int main(int argc, char const *argv[])
@@ -26,12 +30,12 @@ int main(int argc, char const *argv[])
 
     Board init(parse(argv[1]));
     // std::cout << init.size << init.tab.size() << std::endl;
-    if (false && !init.is_solvable())
+    if (!init.is_solvable())
     {
         std::cout << "Not solvable." << std::endl;
         return 0;
     }
-    // ida_star(init);
-    a_star(init);
+    ida_star(init);
+    // a_star(init);
     return 0;
 }

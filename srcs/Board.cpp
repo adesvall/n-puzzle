@@ -114,7 +114,7 @@ int Board::estimate_cost() const
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             int dist = abs(i - tab[n*i+j] / n) + abs(j - tab[n*i+j] % n);
-            res += dist * (tab[n*i+j] != 0);
+            res += dist * (tab[n*i+j] != 0); // non admissible distance
         }
     }
     return res;

@@ -43,9 +43,9 @@ void a_star(Board& init)
         opened.pop();
         if (true)
         {
-            std::cout << "opened : " << opened.size() << "  all: " << all.size() << std::endl;
+            std::cout << "opened : " << opened.size() << "\tall: " << all.size();
             // std::cout << curr->board.toString();
-            std::cout << "g: " << curr->g << " h: " << curr->h << std::endl;
+            std::cout << "\tf: " << curr->g+curr->h << " g: " << curr->g << " h: " << curr->h << std::endl;
         }
         curr->isclosed = true;
         // if (curr->f == 6)
