@@ -105,10 +105,10 @@ float Board::partition_cost()  const
     return resInside;
 }
 
-float Board::estimate_cost() const
+int Board::estimate_cost() const
 {
     // return partition_cost();
-    float res = 2*linear_conflicts();
+    int res = 2*linear_conflicts();
     int n = size;
 
     for (int i = 0; i < n; i++) {
@@ -123,6 +123,9 @@ float Board::estimate_cost() const
 Board Board::move(int i0, int j0, int new_i, int new_j)   const
 {
     Board res(this->tab);
+
+    if (tab[size * i0 + j0] != 0)
+        throw std::invalid_argument("Invalid move");
 
     res.tab[size * i0 + j0] = res.tab[size * new_i + new_j];
     res.tab[size * new_i + new_j] = 0;

@@ -3,6 +3,8 @@ NAME		= n-puzzle
 PURESRCS	= parse.cpp \
 				Board.cpp \
 				State.cpp \
+				a_star.cpp \
+				ida_star.cpp \
 				main.cpp
 
 PURESRCS_DB	= compute_db.cpp \

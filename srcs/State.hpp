@@ -17,7 +17,7 @@ class State
 public:
 
     int             g;
-    float           h;
+    int             h;
     Board           board;
     int             i0;
     int             j0;
@@ -31,6 +31,7 @@ public:
     State(Board board, int i0, int j0, const State* parent, int g );
     ~State();
     std::vector<State> getNeighbors() const;
+    void getNeighbors(std::vector<State>& vec) const;
     bool operator<(const State& rhs) const;
 };
 

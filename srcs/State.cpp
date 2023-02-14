@@ -1,6 +1,5 @@
 #include "State.hpp"
 
-
 State::State()
 {}
 
@@ -16,10 +15,8 @@ State::State(Board board, int i0, int j0, const State* parent, int g)
 State::~State()
 {}
 
-std::vector<State> State::getNeighbors() const
+void State::getNeighbors(std::vector<State>& vec) const
 {
-    std::vector<State> res;
-
     for (int dr = 0; dr < 4; dr++)
     {
         int new_i = i0 + (dr == 2) - (dr == 0);
@@ -31,8 +28,15 @@ std::vector<State> State::getNeighbors() const
         // if (parent && parent->i0 == new_i && parent->j0 == new_j)
         //     continue;
         State state(board.move(i0, j0, new_i, new_j), new_i, new_j, this, g + 1);
-        res.push_back(state);
+        vec.push_back(state);
     }
+}
+
+
+std::vector<State> State::getNeighbors() const
+{
+    std::vector<State> res;
+    getNeighbors(res);
     return res;
 }
 

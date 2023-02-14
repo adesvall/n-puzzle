@@ -21,9 +21,9 @@ unordered_map<string, int> compute_db(int n)
         vector<State> neighbors = curr->getNeighbors();
         for (State n : neighbors)
         {
-            if (!db.count(n.board.toString(true)))
+            if (!db.count(n.board.toString()))
             {
-                db[n.board.toString(true)] = curr->g + 1;
+                db[n.board.toString()] = curr->g + 1;
                 breadth.push_back(n);
             }
         }
