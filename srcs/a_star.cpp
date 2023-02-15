@@ -57,6 +57,7 @@ void a_star(Board& init)
 
             if (all.count(newboard)) {
                 State &tomodify = all[newboard];
+                // non necessaire si l'heuristique est coherente
                 if (!tomodify.isclosed && tomodify.g > curr->g + 1)
                 {
                     (*tomodify.handle)->g = curr->g + 1;

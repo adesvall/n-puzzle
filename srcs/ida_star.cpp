@@ -1,12 +1,13 @@
 #include "main.hpp"
 #include <limits>
 #include <cmath>
-#include <unordered_map>
+#include <unordered_set>
+#include <list>
 
 using namespace std;
 
-int dfs(State& node, int threshold, unordered_map<string, State*>& visited, int depth = 0)  {
-    visited[node.board.toString()] = &node;
+int dfs(State& node, int threshold, unordered_set<string>& visited, int depth = 0)  {
+    visited.insert(node.board.toString());
     int f = node.g + node.h;
     if (f > threshold) {
         return f;
@@ -35,16 +36,44 @@ int dfs(State& node, int threshold, unordered_map<string, State*>& visited, int 
     return min;
 }
 
+int stack_dfs(State& init, int threshold, unordered_set<string>& visited)  {
+    list<State> stack;
+    stack.push_back(init);
+    int next_threshold = numeric_limits<int>::max();
+
+    while (!stack.empty())  {
+        State& curr = stack.back();
+        if (visited.count(curr.board.toString())) {
+            stack.pop_back();
+            continue;
+        }
+        visited.insert(curr.board.toString());
+        if (curr.board.istarget())  {
+            print_res(&curr);
+            return -1;
+        }
+        if (curr.g + curr.h > threshold)    {
+            if (curr.g + curr.h < next_threshold)
+                next_threshold = curr.g + curr.h;
+            stack.pop_back();
+            continue;
+        }
+        // cout << "\t" << curr.g + curr.h << endl;
+        curr.getNeighbors(stack);
+    }
+    return next_threshold;
+}
+
 void ida_star(Board& init) {
     int ij = init.get_empty_coords();
     State root(init, ij / init.size, ij % init.size, (State*)NULL, 0);
-    unordered_map<string, State*> visited;
+    unordered_set<string> visited;
     int threshold = root.h;
     // cout << init.toString() << endl;
     // exit(2);
     while (threshold != -1) {
         cout << "threshold " << threshold;
-        threshold = dfs(root, threshold, visited);
+        threshold = stack_dfs(root, threshold, visited);
         cout << "\tvisited " << visited.size() << endl;
         visited.clear();
     }

@@ -114,7 +114,7 @@ int Board::estimate_cost() const
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             int dist = abs(i - tab[n*i+j] / n) + abs(j - tab[n*i+j] % n);
-            res += dist * (tab[n*i+j] != 0); // non admissible distance
+            res += dist * (tab[n*i+j] != 0);
         }
     }
     return res;
@@ -165,7 +165,7 @@ std::string Board::toString(bool fringe)  const
         if ((i+1) % size == 0)
             stream << '\n';
         else
-            stream << ',';    
+            stream << ',';
     }
     return stream.str();
 }

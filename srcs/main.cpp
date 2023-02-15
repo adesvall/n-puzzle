@@ -5,10 +5,11 @@
 
 void recursive_print(const State *curr, std::ofstream& out)
 {
-    if (!curr->parent)
-        return;
-    recursive_print(curr->parent, out);
-    out << curr->i0 << ' ' << curr->j0 << std::endl;
+    if (curr->parent)
+    {
+        recursive_print(curr->parent, out);
+        out << curr->i0 << ' ' << curr->j0 << std::endl;
+    }
 }
 
 void print_res(const State *curr)
@@ -35,7 +36,7 @@ int main(int argc, char const *argv[])
         std::cout << "Not solvable." << std::endl;
         return 0;
     }
-    ida_star(init);
-    // a_star(init);
+    // ida_star(init);
+    a_star(init);
     return 0;
 }
