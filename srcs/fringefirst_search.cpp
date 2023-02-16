@@ -19,13 +19,13 @@ string fringe_first_search(Board& init)
         Board::fringe = true;
         res += a_star(init);
         cout << init.toString() << endl;
-        Board::fringe = false;
 
         init = init.remove_fringe();
         cout << init.toString() << endl;
+        Board::fringe = false;
     }
     Board::side = false;
-    res += ida_star(init);
+    res += a_star(init);
     return res;
 }
 

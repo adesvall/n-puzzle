@@ -143,7 +143,7 @@ int Board::estimate_cost() const
             res += dist;
         }
     }
-    return 1.5*res;
+    return res;
 }
 
 Board Board::move(int i0, int j0, int new_i, int new_j)   const
