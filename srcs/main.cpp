@@ -3,19 +3,10 @@
 #include <fstream>
 #include <cstdlib>
 
-void recursive_print(const State *curr, std::ofstream& out)
-{
-    if (curr->parent)
-    {
-        recursive_print(curr->parent, out);
-        out << curr->i0 << ' ' << curr->j0 << std::endl;
-    }
-}
-
-void print_res(const State *curr)
+void print_res(std::string moves)
 {
     std::ofstream out("sol.txt");
-    recursive_print(curr, out);
+    out << moves;
 }
 
 int main(int argc, char const *argv[])
@@ -36,7 +27,10 @@ int main(int argc, char const *argv[])
         std::cout << "Not solvable." << std::endl;
         return 0;
     }
-    // ida_star(init);
-    a_star(init);
+    // a_star(init);
+    // std::cout << init.fringe << std::endl;
+    // print_res(a_star(init));
+    // print_res(ida_star(init));
+    print_res(fringe_first_search(init));
     return 0;
 }

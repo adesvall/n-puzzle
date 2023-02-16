@@ -1,13 +1,12 @@
 #include "main.hpp"
 #include <limits>
 #include <cmath>
-#include <unordered_set>
+#include <unordered_map>
 #include <list>
 
 using namespace std;
-
+/*
 int dfs(State& node, int threshold, unordered_set<string>& visited, int depth = 0)  {
-    visited.insert(node.board.toString());
     int f = node.g + node.h;
     if (f > threshold) {
         return f;
@@ -17,6 +16,7 @@ int dfs(State& node, int threshold, unordered_set<string>& visited, int depth = 
         return -1;
     }
 
+    visited.insert(node.board.toString());
     int min = numeric_limits<int>::max();
     vector<State> children;
 
@@ -34,22 +34,22 @@ int dfs(State& node, int threshold, unordered_set<string>& visited, int depth = 
     // cout << "depth\t" << depth << "\tthreshold " << threshold << "\tvisited " << visited.size() << endl;
 
     return min;
-}
+}*/
 
-int stack_dfs(State& init, int threshold, unordered_set<string>& visited)  {
+int stack_dfs(State& init, int threshold, unordered_map<string, int>& visited, stringstream& ss)  {
     list<State> stack;
     stack.push_back(init);
     int next_threshold = numeric_limits<int>::max();
 
     while (!stack.empty())  {
         State& curr = stack.back();
-        if (visited.count(curr.board.toString())) {
+        if (visited.count(curr.board.toString()) && visited[curr.board.toString()] <= curr.g) {
             stack.pop_back();
             continue;
         }
-        visited.insert(curr.board.toString());
         if (curr.board.istarget())  {
-            print_res(&curr);
+            recursive_print(&curr, ss);
+            init.board = curr.board;
             return -1;
         }
         if (curr.g + curr.h > threshold)    {
@@ -59,22 +59,26 @@ int stack_dfs(State& init, int threshold, unordered_set<string>& visited)  {
             continue;
         }
         // cout << "\t" << curr.g + curr.h << endl;
+        visited[curr.board.toString()] = curr.g;
         curr.getNeighbors(stack);
     }
     return next_threshold;
 }
 
-void ida_star(Board& init) {
+string ida_star(Board& init) {
     int ij = init.get_empty_coords();
     State root(init, ij / init.size, ij % init.size, (State*)NULL, 0);
-    unordered_set<string> visited;
+    unordered_map<string, int> visited;
     int threshold = root.h;
-    // cout << init.toString() << endl;
+    stringstream ss;
+    //cout << init.toString() << endl;
     // exit(2);
     while (threshold != -1) {
         cout << "threshold " << threshold;
-        threshold = stack_dfs(root, threshold, visited);
+        threshold = stack_dfs(root, threshold, visited, ss);
         cout << "\tvisited " << visited.size() << endl;
         visited.clear();
     }
+    init = root.board;
+    return ss.str();
 }

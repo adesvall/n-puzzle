@@ -7,9 +7,20 @@
 # include "State.hpp"
 
 std::vector<int> parse(const char *arg);
-void print_res(const State *curr);
-void a_star(Board& init);
-void ida_star(Board& init);
+void print_res(std::string moves);
+std::string a_star(Board& init);
+std::string ida_star(Board& init);
+std::string fringe_first_search(Board& init);
+
+template<typename T>
+void recursive_print(const State *curr, T& out)
+{
+    if (curr->parent)
+    {
+        recursive_print(curr->parent, out);
+        out << curr->i0 << ' ' << curr->j0 << std::endl;
+    }
+}
 
 
 #endif

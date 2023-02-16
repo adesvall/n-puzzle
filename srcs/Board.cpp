@@ -3,6 +3,9 @@
 #include <sstream>
 #include <cmath>
 
+bool Board::fringe = false;
+bool Board::side = false;
+
 Board::Board()
 {}
 Board::Board(int n)
@@ -46,12 +49,25 @@ bool Board::is_solvable() const
     }
 }
 
-int isFringe(int k, int size)
+bool isFringe(int k, int size)
 {
     return k % size == size-1 || k / size == size - 1;
 }
+bool isSide(int k, int size)
+{
+    return k / size == size - 1;
+}
+bool doesCount(int k, int size)
+{
+    if (Board::fringe)
+        return isFringe(k, size);
+    else if (Board::side)
+        return isSide(k, size);
+    return true;
+}
 
-int Board::linear_conflicts(bool partition)  const
+
+int Board::linear_conflicts()  const
 {
     int count = 0;
 
@@ -59,28 +75,32 @@ int Board::linear_conflicts(bool partition)  const
     {
         for (size_t j = 0; j < size; j++)
         {
-            if (tab[size * i + j] && tab[size * i + j] % size == j)
+            if (tab[size * i + j] && tab[size * i + j] % size == j
+            && (doesCount(tab[size * i + j], size))) {
                 for (size_t i2 = i + 1; i2 < size; i2++)
                 {
                     if (tab[size * i2 + j] && tab[size * i2 + j] % size == j
                     && tab[size * i2 + j] < tab[size * i + j]
-                    && (!partition || isFringe(tab[size * i2 + j], size) == isFringe(tab[size * i + j], size)))
+                    && (doesCount(tab[size * i2 + j], size)))
                         count++;
                 }
+            }
 
-            if (tab[size * i + j] && tab[size * i + j] / size == i)
+            if (tab[size * i + j] && tab[size * i + j] / size == i
+            && (doesCount(tab[size * i + j], size))) {
                 for (size_t j2 = j + 1; j2 < size; j2++)
                 {
                     if (tab[size * i + j2] && tab[size * i + j2] / size == i
                     && tab[size * i + j2] < tab[size * i + j]
-                    && (!partition || isFringe(tab[size * i + j2], size) == isFringe(tab[size * i + j], size)))
+                    && (doesCount(tab[size * i + j2], size)))
                         count++;
                 }
+            }
         }
     }
     return count;
 }
-
+/*
 float Board::partition_cost()  const
 {
     float resFringe = 0;
@@ -103,8 +123,8 @@ float Board::partition_cost()  const
     if (resFringe > resInside)
         return resFringe;
     return resInside;
-}
-
+}*/
+#include <iostream>
 int Board::estimate_cost() const
 {
     // return partition_cost();
@@ -113,11 +133,17 @@ int Board::estimate_cost() const
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
+            if (!tab[n*i+j])
+                continue;
             int dist = abs(i - tab[n*i+j] / n) + abs(j - tab[n*i+j] % n);
-            res += dist * (tab[n*i+j] != 0);
+            if (!doesCount(tab[n*i+j], size))
+                dist = doesCount(n*i+j, size);
+            if (Board::fringe && isSide(tab[n*i+j], size))
+                dist *= 100;
+            res += dist;
         }
     }
-    return res;
+    return 1.5*res;
 }
 
 Board Board::move(int i0, int j0, int new_i, int new_j)   const
@@ -145,20 +171,20 @@ bool Board::istarget()  const
 {
     for (size_t i = 0; i < tab.size(); i++)
     {
-        if (tab[i] != (int)i)
+        if ((doesCount(i, size)) && tab[i] != (int)i)
             return false;
     }
     return true;
 }
 
-std::string Board::toString(bool fringe)  const
+std::string Board::toString()  const
 {
     std::stringstream stream;
 
     for (size_t i = 0; i < tab.size(); i++)
     {
 
-        if (!fringe || isFringe(tab[i], size) || !tab[i])
+        if (doesCount(tab[i], size) || !tab[i])
             stream << tab[i];
         else
             stream << '*';
@@ -170,6 +196,20 @@ std::string Board::toString(bool fringe)  const
     return stream.str();
 }
 
+
+Board Board::remove_fringe()   const
+{
+    Board res;
+    res.size = size - 1;
+    for (size_t i = 0; i < size*size; i++)
+    {
+        if (isFringe(i, size))
+            continue;
+        int val = tab[i] / size * res.size + tab[i] % size;
+        res.tab.push_back(val);
+    }
+    return res;
+}
 
 // namespace std
 // {

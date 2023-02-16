@@ -5,6 +5,7 @@ PURESRCS	= parse.cpp \
 				State.cpp \
 				a_star.cpp \
 				ida_star.cpp \
+				fringefirst_search.cpp \
 				main.cpp
 
 PURESRCS_DB	= compute_db.cpp \

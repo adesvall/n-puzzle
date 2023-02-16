@@ -1,13 +1,15 @@
 #include "main.hpp"
 #include <unordered_map>
 
-void a_star(Board& init)
+std::string a_star(Board& init)
 {
     boost::heap::fibonacci_heap<State*, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>    opened;
     std::allocator<std::pair<Board, State>> a;
     std::unordered_map<std::string, State> all(a);
 
+    int minf = 0;
     int n = init.size;
+
     // std::string goalstr =  "0,1,2,3\n4,5,6,7\n8,9,10,11\n12,13,14,15\n";
     std::string goalstr =  Board(n).toString();
 
@@ -19,16 +21,6 @@ void a_star(Board& init)
 
     while (!opened.empty())
     {
-        if (all.count(goalstr))
-        {
-            // printf("trouvé\n");
-            // print_res(curr->;
-            State* curr = &all[goalstr];
-            print_res(curr);
-            all.clear();
-            opened.clear();
-            exit(0);
-        }
         // std::cout << "size:" << opened.size() << std::endl;
         // if (opened.size() >= 100)
         // {
@@ -41,8 +33,9 @@ void a_star(Board& init)
         // }
         State *curr = opened.top();
         opened.pop();
-        if (true)
+        if (curr->g + curr->h > minf)
         {
+            minf = curr->g + curr->h;
             std::cout << "opened : " << opened.size() << "\tall: " << all.size();
             // std::cout << curr->board.toString();
             std::cout << "\tf: " << curr->g+curr->h << " g: " << curr->g << " h: " << curr->h << std::endl;
@@ -55,6 +48,18 @@ void a_star(Board& init)
         {
             std::string newboard = it->board.toString();
 
+            if (it->board.istarget())
+            {
+                // printf("trouvé\n");
+                // print_res(curr->;
+                State* curr = &(*it);
+                init = curr->board;
+                std::stringstream ss;
+                recursive_print(curr, ss);
+                all.clear();
+                opened.clear();
+                return ss.str();
+            }
             if (all.count(newboard)) {
                 State &tomodify = all[newboard];
                 // non necessaire si l'heuristique est coherente
@@ -72,4 +77,5 @@ void a_star(Board& init)
         }
     }
     std::cout << "Fatal no solution found after exploring everything." << std::endl;
+    return "Fatal";
 }
