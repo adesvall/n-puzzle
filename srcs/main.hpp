@@ -8,9 +8,10 @@
 
 std::vector<int> parse(const char *arg);
 void print_res(std::string moves);
-std::string a_star(Board& init);
+std::string a_star(Board& init, bool flex = false);
 std::string ida_star(Board& init);
 std::string fringe_first_search(Board& init);
+std::string fringe_partial_search(Board& init);
 
 template<typename T>
 void recursive_print(const State *curr, T& out)

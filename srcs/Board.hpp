@@ -1,13 +1,13 @@
 #include <string>
 #include <vector>
+#include <set>
 
 struct Board
 {
     std::vector<int> tab;
-    size_t size;
 
-    static bool fringe;
-    static bool side;
+    static size_t size;
+    static std::set<int> selection;
 
     Board();
     Board(int n);
@@ -24,5 +24,10 @@ struct Board
     // bool operator==(Board &rhs) const;
     std::string toString()  const;
     Board remove_fringe()   const;
+
+    static void emptySelection();
+    static void fringeSelection();
+    static void bottomSelection();
+    static void addSelection(int k);
 
 };

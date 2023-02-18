@@ -29,6 +29,16 @@ def empty_coords(t):
             return i, t[i].index(0)
     return 0, 0
 
+def check_moves():
+    global board
+    copy = [t[:] for t in board]
+    for i,j in moves:
+        boardmove(i, j, anim=False)
+    if board != target:
+        print("moves don't lead to target")
+        print(board)
+    board = copy
+
 def launch():
     t = 0
     for i,j in moves:
@@ -42,12 +52,12 @@ def soft_move(obj, newx, newy):
 
     for i in range(10):
         mv = 1 - (i / 10)**2
-        cnv.after(i*10, f, mv / 7.15)
+        cnv.after(i*5, f, mv / 7.15)
 
-    cnv.after(101, lambda : cnv.moveto(obj, newx, newy))
+    cnv.after(100, lambda : cnv.moveto(obj, newx, newy))
 
-def boardmove(newi, newj):
-    global i0, j0
+def boardmove(newi, newj, anim=True):
+    global i0, j0, board, obj
     dx, dy = j0-newj, i0-newi
     # print("move", dx, dy)
     if (abs(dx) != 1 and abs(dy) != 1) or (dx and dy):
@@ -56,16 +66,15 @@ def boardmove(newi, newj):
     if newi < 0 or newi >= n or newj < 0 or newj >= n:
         print("invalid_move: out")
         return
-    obj = objboard[board[newi][newj]]
+    if anim:
+        obj = objboard[board[newi][newj]]
+        soft_move(obj, round(j0 * cx), round(i0 * cy))
     board[newi][newj], board[i0][j0] = board[i0][j0], board[newi][newj]
-    soft_move(obj, j0 * cx, i0 * cy)
     i0, j0 = newi, newj
     # print(board)
     if board == target:
         print("You win !")
         # exit()
-    
-    
 
 def key_press(event):
     code = event.keycode
@@ -98,7 +107,9 @@ i0, j0 = empty_coords(board)
 
 moves = read_moves()
 
-raw = Image.open("batiment.jpeg").reduce(2)
+
+raw = Image.open("color.jpeg")
+raw = raw.resize((1000, 1000 * raw.height // raw.width))
 height = raw.height
 width = raw.width
 
@@ -111,13 +122,14 @@ cy = height / n
 imgtab = []
 for i in range(n):
     for j in range(n):
-        imgtab.append(ImageTk.PhotoImage(raw.crop((j * cx, i * cy, (j+1) * cx, (i+1) * cy))))
+        imgtab.append(ImageTk.PhotoImage(raw.crop((j * cx, i * cy, (j+1) * cx + 1, (i+1) * cy + 1))))
 objboard = [None] * (n*n)
 for j in range(n):
     for i in range(n):
         if board[i][j]:
             objboard[board[i][j]] = cnv.create_image(j * cx, i * cy, image=imgtab[board[i][j]], anchor="nw")
 
+# check_moves()
 
 root.bind('<KeyPress>', key_press)
 

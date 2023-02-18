@@ -31,6 +31,7 @@ int main(int argc, char const *argv[])
     // std::cout << init.fringe << std::endl;
     // print_res(a_star(init));
     // print_res(ida_star(init));
-    print_res(fringe_first_search(init));
+    // print_res(fringe_first_search(init));
+    print_res(fringe_partial_search(init));
     return 0;
 }

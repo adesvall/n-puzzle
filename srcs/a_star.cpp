@@ -1,7 +1,7 @@
 #include "main.hpp"
 #include <unordered_map>
 
-std::string a_star(Board& init)
+std::string a_star(Board& init, bool flex)
 {
     boost::heap::fibonacci_heap<State*, boost::heap::mutable_<true>, boost::heap::compare<PointerCompare<State>>>    opened;
     std::allocator<std::pair<Board, State>> a;
@@ -44,34 +44,32 @@ std::string a_star(Board& init)
         // if (curr->f == 6)
         //     exit(100);
         std::vector<State> neighbors = curr->getNeighbors();
-        for (std::vector<State>::iterator it = neighbors.begin(); it != neighbors.end(); it++)
+        for (State& neighbor : neighbors)
         {
-            std::string newboard = it->board.toString();
+            std::string newboard = neighbor.board.toString();
 
-            if (it->board.istarget())
+            if (neighbor.board.istarget() || (flex && neighbor.h < 3*(n*n-1)))
             {
                 // printf("trouvé\n");
                 // print_res(curr->;
-                State* curr = &(*it);
-                init = curr->board;
                 std::stringstream ss;
-                recursive_print(curr, ss);
+                recursive_print(&neighbor, ss);
+                init = neighbor.board;
                 all.clear();
                 opened.clear();
                 return ss.str();
             }
             if (all.count(newboard)) {
                 State &tomodify = all[newboard];
-                // non necessaire si l'heuristique est coherente
-                if (!tomodify.isclosed && tomodify.g > curr->g + 1)
+                // non necessaire si l'heuristique est coherente ?
+                if (tomodify.g > curr->g + 1)
                 {
-                    (*tomodify.handle)->g = curr->g + 1;
-                    (*tomodify.handle)->parent = curr;
-                    opened.update(tomodify.handle);
+                    all[newboard] = neighbor;
+                    all[newboard].handle = opened.push(&all[newboard]);
                 }
             }
             else    {
-                all.emplace(newboard, *it);
+                all.emplace(newboard, neighbor);
                 all[newboard].handle = opened.push(&all[newboard]);
             }
         }

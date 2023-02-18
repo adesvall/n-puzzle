@@ -3,9 +3,27 @@
 #include <sstream>
 #include <cmath>
 
-bool Board::fringe = false;
-bool Board::side = false;
+std::set<int> Board::selection;
+size_t Board::size = 0;
 
+void Board::emptySelection()    {
+    selection.clear();
+}
+void Board::fringeSelection()   {
+    bottomSelection();
+    size_t i = 0;
+    for (; i < size-1; i++)
+        selection.insert(size*i + size - 1);
+}
+void Board::bottomSelection()   {
+    emptySelection();
+    size_t j = 0;
+    for (; j < size; j++)
+        selection.insert(size*(size-1) + j);
+}
+void Board::addSelection(int k) {
+    selection.insert(k);
+}
 Board::Board()
 {}
 Board::Board(int n)
@@ -53,16 +71,14 @@ bool isFringe(int k, int size)
 {
     return k % size == size-1 || k / size == size - 1;
 }
-bool isSide(int k, int size)
+// bool isSide(int k)
+// {
+//     return k / size == size - 1;
+// }
+bool doesCount(int k)
 {
-    return k / size == size - 1;
-}
-bool doesCount(int k, int size)
-{
-    if (Board::fringe)
-        return isFringe(k, size);
-    else if (Board::side)
-        return isSide(k, size);
+    if (Board::selection.size())
+        return Board::selection.count(k);
     return true;
 }
 
@@ -76,23 +92,23 @@ int Board::linear_conflicts()  const
         for (size_t j = 0; j < size; j++)
         {
             if (tab[size * i + j] && tab[size * i + j] % size == j
-            && (doesCount(tab[size * i + j], size))) {
+            && (doesCount(tab[size * i + j]))) {
                 for (size_t i2 = i + 1; i2 < size; i2++)
                 {
                     if (tab[size * i2 + j] && tab[size * i2 + j] % size == j
                     && tab[size * i2 + j] < tab[size * i + j]
-                    && (doesCount(tab[size * i2 + j], size)))
+                    && (doesCount(tab[size * i2 + j])))
                         count++;
                 }
             }
 
             if (tab[size * i + j] && tab[size * i + j] / size == i
-            && (doesCount(tab[size * i + j], size))) {
+            && (doesCount(tab[size * i + j]))) {
                 for (size_t j2 = j + 1; j2 < size; j2++)
                 {
                     if (tab[size * i + j2] && tab[size * i + j2] / size == i
                     && tab[size * i + j2] < tab[size * i + j]
-                    && (doesCount(tab[size * i + j2], size)))
+                    && (doesCount(tab[size * i + j2])))
                         count++;
                 }
             }
@@ -136,10 +152,11 @@ int Board::estimate_cost() const
             if (!tab[n*i+j])
                 continue;
             int dist = abs(i - tab[n*i+j] / n) + abs(j - tab[n*i+j] % n);
-            if (!doesCount(tab[n*i+j], size))
-                dist = doesCount(n*i+j, size);
-            if (Board::fringe && isSide(tab[n*i+j], size))
-                dist *= 100;
+            if (!doesCount(tab[n*i+j]))
+                dist = doesCount(n*i+j);
+            dist *= 3;
+            // if (Board::fringe && isSide(tab[n*i+j], size))
+            //     dist *= 100;
             res += dist;
         }
     }
@@ -171,7 +188,7 @@ bool Board::istarget()  const
 {
     for (size_t i = 0; i < tab.size(); i++)
     {
-        if ((doesCount(i, size)) && tab[i] != (int)i)
+        if (doesCount(i) && tab[i] != (int)i)
             return false;
     }
     return true;
@@ -184,7 +201,7 @@ std::string Board::toString()  const
     for (size_t i = 0; i < tab.size(); i++)
     {
 
-        if (doesCount(tab[i], size) || !tab[i])
+        if (doesCount(tab[i]) || !tab[i])
             stream << tab[i];
         else
             stream << '*';
@@ -200,14 +217,14 @@ std::string Board::toString()  const
 Board Board::remove_fringe()   const
 {
     Board res;
-    res.size = size - 1;
     for (size_t i = 0; i < size*size; i++)
     {
         if (isFringe(i, size))
             continue;
-        int val = tab[i] / size * res.size + tab[i] % size;
+        int val = tab[i] / size * (size-1) + tab[i] % size;
         res.tab.push_back(val);
     }
+    size--;
     return res;
 }
 
